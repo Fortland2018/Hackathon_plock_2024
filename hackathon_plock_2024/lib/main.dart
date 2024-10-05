@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Dodaj ten import
+import 'package:hackathon_plock_2024/themes/light_mode.dart';
+import 'themes/dark_mode.dart';
+import 'themes/theme_provider.dart';
 
 final List<int> _items = List<int>.generate(10, (int index) => index);
 
@@ -9,27 +13,50 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorSchemeSeed: const Color(0xff6750a4),
-        useMaterial3: true,
+    return ChangeNotifierProvider(
+      create: (context) => ThemeProvider(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Hackathon Plock 2024',
+            theme: themeProvider.themeData,
+            darkTheme: darkMode, // Zakładając, że masz zdefiniowany darkMode
+            themeMode: themeProvider.themeMode,
+            home: Home(),
+          );
+        },
       ),
-      home: const AppBarExample(),
     );
   }
 }
 
-class AppBarExample extends StatefulWidget {
-  const AppBarExample({super.key});
+class Home extends StatefulWidget {
+  const Home({super.key});
 
   @override
-  State<AppBarExample> createState() => _AppBarExampleState();
+  State<Home> createState() => _HomeState();
 }
 
-class _AppBarExampleState extends State<AppBarExample> {
+class _HomeState extends State<Home> {
   bool shadowColor = false;
   double? scrolledUnderElevation;
+  Widget buildtheme(BuildContext context) {
+    return IconButton(
+      icon: Icon(
+        Provider.of<ThemeProvider>(context).themeData == darkMode
+            ? Icons.nights_stay
+            : Icons.wb_sunny,
+        size: 30,
+        color: Provider.of<ThemeProvider>(context).themeData == darkMode
+            ? Colors.white
+            : Colors.black,
+      ),
+      onPressed: () {
+        Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,39 +66,63 @@ class _AppBarExampleState extends State<AppBarExample> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('AppBar Demo'),
-        scrolledUnderElevation: scrolledUnderElevation,
+        title: const Text('Nazwa apki'),
+        scrolledUnderElevation: 4,
         shadowColor: shadowColor ? Theme.of(context).colorScheme.shadow : null,
+        actions: [
+          Builder(
+            builder: (context) => buildtheme(context), // Użycie Buildera
+          ),
+        ],
       ),
-      body: GridView.builder(
-        itemCount: _items.length,
-        padding: const EdgeInsets.all(8.0),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 1,
-          childAspectRatio: 2.0,
-          mainAxisSpacing: 10.0,
-          crossAxisSpacing: 10.0,
-        ),
-        itemBuilder: (BuildContext context, int index) {
-          if (index == 0) {
-            return Center(
-              child: Text(
-                'Scroll to see the Appbar in effect.',
-                style: Theme.of(context).textTheme.labelLarge,
-                textAlign: TextAlign.center,
+      body: Column(
+        children: [
+          Switch(
+            value:
+                Provider.of<ThemeProvider>(context).themeMode == ThemeMode.dark,
+            onChanged: (value) {
+              if (value) {
+                Provider.of<ThemeProvider>(context, listen: false)
+                    .changeTheme('dark', darkMode);
+              } else {
+                Provider.of<ThemeProvider>(context, listen: false)
+                    .changeTheme('light', lightMode);
+              }
+            },
+          ),
+          Expanded(
+            child: GridView.builder(
+              itemCount: _items.length,
+              padding: const EdgeInsets.all(8.0),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1,
+                childAspectRatio: 2.0,
+                mainAxisSpacing: 10.0,
+                crossAxisSpacing: 10.0,
               ),
-            );
-          }
-          return Container(
-            alignment: Alignment.center,
-            // tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.0),
-              color: _items[index].isOdd ? oddItemColor : evenItemColor,
+              itemBuilder: (BuildContext context, int index) {
+                if (index == 0) {
+                  return Center(
+                    child: Text(
+                      'Custom Element',
+                      style: Theme.of(context).textTheme.labelLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                }
+                return Container(
+                  alignment: Alignment.center,
+                  // tileColor: _items[index].isOdd ? oddItemColor : evenItemColor,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20.0),
+                    color: _items[index].isOdd ? oddItemColor : evenItemColor,
+                  ),
+                  child: Text('Item $index'),
+                );
+              },
             ),
-            child: Text('Item $index'),
-          );
-        },
+          ),
+        ],
       ),
       bottomNavigationBar: BottomAppBar(
         child: Padding(
@@ -80,37 +131,7 @@ class _AppBarExampleState extends State<AppBarExample> {
             overflowAlignment: OverflowBarAlignment.center,
             alignment: MainAxisAlignment.center,
             overflowSpacing: 5.0,
-            children: <Widget>[
-              ElevatedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    shadowColor = !shadowColor;
-                  });
-                },
-                icon: Icon(
-                  shadowColor ? Icons.visibility_off : Icons.visibility,
-                ),
-                label: const Text('shadow color'),
-              ),
-              const SizedBox(width: 5),
-              ElevatedButton(
-                onPressed: () {
-                  if (scrolledUnderElevation == null) {
-                    setState(() {
-                      // Default elevation is 3.0, increment by 1.0.
-                      scrolledUnderElevation = 4.0;
-                    });
-                  } else {
-                    setState(() {
-                      scrolledUnderElevation = scrolledUnderElevation! + 1.0;
-                    });
-                  }
-                },
-                child: Text(
-                  'scrolledUnderElevation: ${scrolledUnderElevation ?? 'default'}',
-                ),
-              ),
-            ],
+            children: <Widget>[],
           ),
         ),
       ),
@@ -118,8 +139,7 @@ class _AppBarExampleState extends State<AppBarExample> {
   }
 }
 
-
- /*
+/*
     final themeProvider = Provider.of<ThemeProvider>(context);
 
     // Ustal kolory na podstawie motywu
