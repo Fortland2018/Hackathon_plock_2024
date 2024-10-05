@@ -60,3 +60,22 @@ class ThemeProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
+/*
+  Widget buildtheme(BuildContext context) {
+    return IconButton(
+      icon: Icon(
+        Provider.of<ThemeProvider>(context).themeData == darkMode
+            ? Icons.nights_stay
+            : Icons.wb_sunny,
+        size: 30,
+        color: Provider.of<ThemeProvider>(context).themeData == darkMode
+            ? Colors.white
+            : Colors.black,
+      ),
+      onPressed: () {
+        Provider.of<ThemeProvider>(context, listen: false).toggleTheme();
+      },
+    );
+  }
+
+*/
