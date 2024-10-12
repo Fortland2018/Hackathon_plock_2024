@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart'; // Dodaj ten import
 import 'package:hackathon_plock_2024/themes/light_mode.dart';
-import 'themes/dark_mode.dart';
-import 'themes/theme_provider.dart';
+import '../themes/dark_mode.dart';
+import '../themes/theme_provider.dart';
 
 final List<int> _items = List<int>.generate(10, (int index) => index);
 
